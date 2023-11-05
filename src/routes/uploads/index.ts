@@ -6,7 +6,7 @@ import path from 'path'
 import multer from 'multer'
 
 // Create a directory to store uploaded files
-const uploadDir = 'uploads'
+const uploadDir = path.join(__dirname, '../../../uploads')
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir)
 }
@@ -35,7 +35,7 @@ uploadRoute.post(
 )
 
 uploadRoute.get('/download/:filename', (req, res) => {
-    const filePath = path.join(__dirname, uploadDir, req.params.filename)
+    const filePath = path.join(uploadDir, req.params.filename)
 
     console.log(filePath)
 
