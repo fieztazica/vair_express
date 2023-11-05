@@ -48,18 +48,18 @@ export const socketAuthCheck = (socket: Socket, next: SocketNextCallback) => {
                 headers: { Authorization: token },
             })
             if (!authRes) {
-                throw createHttpError.Unauthorized()
+                throw new Error('You are not signed in.')
             }
             if (
                 !authRes.data?.role ||
                 !authRes.data?.role?.name ||
                 authRes.data.role.name != 'Developer'
             ) {
-                throw createHttpError.Unauthorized('You are not a developer')
+                throw new Error('You are not a developer')
             }
             next()
         } catch (error) {
-            next(error)
+            next(error.response.data.error ?? error)
         }
     }
     validateToken(token)
