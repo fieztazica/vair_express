@@ -38,13 +38,31 @@ uploadButton.addEventListener('click', (e) => {
 
     if (file.size < 1024 * 1024) {
         alert('File too small')
+        createProdForm.reset()
         return
     }
 
     isUploading = true
     uploadButton.disabled = isUploading
+    const fileName = file.name
     const fileSize = file.size
-    sendFileChunks(file, fileSize)
+    socket.emit(
+        'fileChunk',
+        { fileName, dataChunk: null, chunkIndex: 0, totalChunks: 0 },
+        (ack) => {
+            if (ack.message === 'File already exists') {
+                console.log(`File '${fileName}' already exists on the server.`)
+                alert(`File '${fileName}' already exists on the server.`)
+                createProdForm.reset()
+                isUploading = false
+                uploadButton.disabled = isUploading
+                return
+            } else {
+                // Start sending file chunks
+                sendFileChunks(file, fileSize)
+            }
+        }
+    )
 })
 
 socket.on('uploadComplete', (data) => {
@@ -55,7 +73,8 @@ socket.on('uploadComplete', (data) => {
 })
 
 socket.on('connect_error', (err) => {
-    alert(`Connection failed. ${err.message}`)
+    alert(`Connection failed. ${err.message}. Please reload the page or sign in`)
+    uploadButton.disabled = true
     console.error(err)
 })
 

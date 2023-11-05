@@ -19,6 +19,16 @@ export default (socket: Socket) => {
 
         const filePath = path.join(uploadDir, fileName)
 
+        if (fs.existsSync(filePath)) {
+            // File already exists, you can handle this scenario as needed
+            console.log(`File '${fileName}' already exists on the server.`)
+            ack({
+                receivedChunkIndex: chunkIndex,
+                message: 'File already exists',
+            })
+            return
+        }
+
         // Write the data chunk to the file
         fs.appendFile(filePath, dataChunk, (err) => {
             if (err) {
