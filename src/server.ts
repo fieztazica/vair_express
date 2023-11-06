@@ -1,17 +1,10 @@
 import { app } from './app'
-import { Server as socketIo } from 'socket.io'
-import handleSocketConnection from './handleSocketConnection'
-import { socketAuthCheck } from './middlewares/auth'
 
 const port = app.get('port')
 
 const server = app.listen(port, onListening)
-export const io = new socketIo(server, {
-    maxHttpBufferSize: 1e8,
-})
+
 server.on('error', onError)
-io.use(socketAuthCheck)
-io.on('connection', handleSocketConnection)
 
 function onError(error: NodeJS.ErrnoException) {
     if (error.syscall !== 'listen') {

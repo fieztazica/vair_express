@@ -59,7 +59,7 @@ export const socketAuthCheck = (socket: Socket, next: SocketNextCallback) => {
             }
             next()
         } catch (error) {
-            next(error.response.data.error ?? error)
+            next(error?.response?.data?.error ?? error)
         }
     }
     validateToken(token)
