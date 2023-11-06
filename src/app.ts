@@ -5,6 +5,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import * as dotenv from 'dotenv'
 import expressLayouts from 'express-ejs-layouts'
+import cookieParser from 'cookie-parser'
 
 import { errorHandler, errorNotFoundHandler } from './middlewares/errorHandler'
 
@@ -26,6 +27,7 @@ export const app = express()
 app.use(helmet())
 app.use(cors())
 app.use(express.json())
+app.use(cookieParser())
 
 // Express configuration
 
