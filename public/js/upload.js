@@ -3,13 +3,7 @@ const uploadButton = document.getElementById('uploadButton')
 const progressOutput = document.getElementById('progressOutput')
 const createProdForm = document.getElementById('createProdForm')
 
-const token = localStorage.getItem('token')
-
-const socket = io({
-    auth: {
-        token: `Bearer ${token}`,
-    },
-})
+const socket = io()
 
 const chunkSize = 1024 * 1024 // 1MB chunks
 let offset = 0
@@ -73,7 +67,9 @@ socket.on('uploadComplete', (data) => {
 })
 
 socket.on('connect_error', (err) => {
-    alert(`Connection failed. ${err.message}. Please reload the page or sign in`)
+    alert(
+        `Connection failed. ${err.message}. Please reload the page or sign in`
+    )
     uploadButton.disabled = true
     console.error(err)
 })

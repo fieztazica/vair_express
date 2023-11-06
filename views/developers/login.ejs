@@ -1,10 +1,12 @@
 <div class="log-form">
-    <h2>Login to your account</h2>
-    <form id="loginForm">
+    <h2>Welcome to Vair Developers</h2>
+
+    <h3>Please login to continue</h3>
+    <form method="POST" enctype="multipart/form-data">
         <input
-            name="username"
+            name="identifier"
             type="text"
-            title="username"
+            title="identifier"
             placeholder="Identifier"
         />
         <input
@@ -13,10 +15,19 @@
             title="username"
             placeholder="Password"
         />
+        <% if (error) { %>
+        <p class="error"><%= error.message %></p>
+        <% } %>
         <button type="submit" class="btn">Login</button>
-        <a class="forgot" href="#">Forgot Username?</a>
+        <br />
+        <div>
+            <p> Want to become a developer?</p>
+            <p>
+                Contact us at
+                <a target="_blank" href="mailto:vair-app@hutech.edu.vn"
+                    >vair-app@hutech.edu.vn</a
+                >
+            </p>
+        </div>
     </form>
 </div>
-<!--end log form -->
-
-<script src="/js/login.js"></script>

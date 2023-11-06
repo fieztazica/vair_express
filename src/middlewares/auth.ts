@@ -3,6 +3,7 @@ import createHttpError from 'http-errors'
 import axios from 'axios'
 import { Socket } from 'socket.io'
 import { ExtendedError } from 'socket.io/dist/namespace'
+import { KeyConst } from '../types/keyConst'
 
 type SocketNextCallback = (err?: ExtendedError) => void
 
@@ -15,7 +16,8 @@ export const checkAuthorization = async (
     next: NextFunction
 ) => {
     try {
-        const token = req.headers.authorization
+        const token =
+            req.headers.authorization || `Bearer ${req.cookies[KeyConst.TOKEN]}`
         if (!token) {
             throw createHttpError.Unauthorized()
         }
@@ -25,10 +27,18 @@ export const checkAuthorization = async (
         if (!authRes) {
             throw createHttpError.Unauthorized()
         }
+
+        if (authRes?.data) {
+            res.cookie(KeyConst.USER, JSON.stringify(authRes.data), {
+                maxAge: 900000,
+                httpOnly: true,
+            })
+        }
+
         if (
             !authRes.data?.role ||
             !authRes.data?.role?.name ||
-            authRes.data.role.name != 'Developer'
+            authRes.data.role.name != KeyConst.DEVELOPER
         ) {
             throw createHttpError.Unauthorized('You are not a developer')
         }
@@ -40,8 +50,52 @@ export const checkAuthorization = async (
     }
 }
 
+export const checkAuthorizationView = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const token =
+            req.headers.authorization || `Bearer ${req.cookies[KeyConst.TOKEN]}`
+        if (!token) {
+            res.redirect('/developers')
+        }
+        const authRes = await axios.get(authUrl, {
+            headers: { Authorization: token },
+        })
+        if (!authRes) {
+            res.redirect('/developers')
+        }
+
+        if (authRes?.data) {
+            res.cookie(KeyConst.USER, JSON.stringify(authRes.data), {
+                maxAge: 900000,
+                httpOnly: true,
+            })
+        }
+
+        if (
+            !authRes.data?.role ||
+            !authRes.data?.role?.name ||
+            authRes.data.role.name != KeyConst.DEVELOPER
+        ) {
+            res.redirect('/developers')
+        }
+        // console.log(authRes.data)
+        next()
+    } catch (error) {
+        res.redirect('/developers')
+    }
+}
+
 export const socketAuthCheck = (socket: Socket, next: SocketNextCallback) => {
-    const token = socket.handshake.auth.token
+    const token =
+        'Bearer ' +
+        socket.handshake.headers.cookie
+            .split('; ')
+            .find((v) => v.includes(KeyConst.TOKEN))
+            .split('=')[1]
     const validateToken = async (token: string) => {
         try {
             const authRes = await axios.get(authUrl, {
@@ -53,7 +107,7 @@ export const socketAuthCheck = (socket: Socket, next: SocketNextCallback) => {
             if (
                 !authRes.data?.role ||
                 !authRes.data?.role?.name ||
-                authRes.data.role.name != 'Developer'
+                authRes.data.role.name != KeyConst.DEVELOPER
             ) {
                 throw new Error('You are not a developer')
             }

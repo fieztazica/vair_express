@@ -4,10 +4,7 @@ import fs from 'fs'
 import { Socket } from 'socket.io'
 
 // Create a directory to store uploaded files
-const uploadDir = path.join(__dirname, '../uploads')
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir)
-}
+const uploadDir = path.join(__dirname, '../../../uploads')
 
 export const index = async (req: Request, res: Response): Promise<void> => {
     // Check if there are any files in the request
@@ -38,11 +35,15 @@ export const handleSocketConnection = (socket: Socket) => {
     })
 
     socket.on('fileChunk', (data, ack) => {
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir)
+        }
+
         const { fileName, dataChunk, chunkIndex, totalChunks } = data
 
         const filePath = path.join(uploadDir, fileName)
 
-        if (fs.existsSync(filePath)) {
+        if (!!fileName && !dataChunk && fs.existsSync(filePath)) {
             // File already exists, you can handle this scenario as needed
             console.log(`File '${fileName}' already exists on the server.`)
             ack({
@@ -52,19 +53,27 @@ export const handleSocketConnection = (socket: Socket) => {
             return
         }
 
-        // Write the data chunk to the file
-        fs.appendFile(filePath, dataChunk, (err) => {
-            if (err) {
-                console.error('Error writing file chunk:', err)
-                ack({
-                    receivedChunkIndex: chunkIndex,
-                    error: 'Error writing file chunk',
-                })
-            } else {
-                console.log(`Received and saved chunk ${chunkIndex}`)
-                ack({ receivedChunkIndex: chunkIndex })
-            }
-        })
+        try {
+            // Write the data chunk to the file
+            fs.appendFile(filePath, dataChunk, (err) => {
+                if (err) {
+                    console.error('Error writing file chunk:', err)
+                    ack({
+                        receivedChunkIndex: chunkIndex,
+                        error: 'Error writing file chunk',
+                    })
+                } else {
+                    console.log(`Received and saved chunk ${chunkIndex}`)
+                    ack({ receivedChunkIndex: chunkIndex })
+                }
+            })
+        } catch (error) {
+            console.error('Error writing file chunk:', error)
+            ack({
+                receivedChunkIndex: chunkIndex,
+                error: 'Error writing file chunk',
+            })
+        }
     })
 
     socket.on('verifyFile', (data) => {

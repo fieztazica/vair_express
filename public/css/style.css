@@ -9,7 +9,10 @@ body {
     font-size: 26px;
 }
 
-
+.error {
+    color: red;
+    font-size: .6em;
+}
 
 .wrapper {
     width: 700px;
