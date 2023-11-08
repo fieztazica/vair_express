@@ -6,4 +6,11 @@
             <input type="submit" class="btn" value="Logout" />
         </form>
     </div>
+    <div>
+        <ul>
+            <% products.forEach(product => { %>
+            <li><%= product.name%></li>
+            <% }) %>
+        </ul>
+    </div>
 </div>

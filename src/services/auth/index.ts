@@ -1,17 +1,15 @@
 import axios, { AxiosError } from 'axios'
 import { StrapiLoginLocal, StrapiRes } from 'strapiRes'
+import AxiosService, { axiosDefaultConfig } from '../axios'
+import { LoginSchema } from 'auth.types'
 
-const baseUrl = process.env.STRAPI_URL as string
-
-type LoginSchema = {
-    identifier: string
-    password: string
-}
-
-class AuthService {
-    _instance = axios.create({
-        baseURL: `${baseUrl}/api/auth`,
-    })
+class AuthService extends AxiosService {
+    constructor() {
+        super('/auth', {
+            ...axiosDefaultConfig,
+            headers: { Authorization: undefined },
+        })
+    }
     async localLogin(data: LoginSchema) {
         try {
             return await this._instance.post<StrapiLoginLocal>('/local', data)
