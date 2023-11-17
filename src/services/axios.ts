@@ -1,4 +1,9 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
+import axios, {
+    AxiosError,
+    AxiosInstance,
+    AxiosRequestConfig,
+    AxiosResponse,
+} from 'axios'
 import { StrapiRes } from 'strapiRes'
 
 const baseUrl = `${process.env.STRAPI_URL as string}`
@@ -11,7 +16,7 @@ export const axiosDefaultConfig: AxiosRequestConfig = {
 }
 
 class AxiosService {
-    _instance: AxiosInstance
+    private instance: AxiosInstance
     constructor(extendBaseUrl?: string, config?: AxiosRequestConfig) {
         let defaultConfig = {
             ...axiosDefaultConfig,
@@ -22,39 +27,55 @@ class AxiosService {
             }
         }
         if (extendBaseUrl) defaultConfig.baseURL += extendBaseUrl
-        this._instance = axios.create(defaultConfig)
+        const instance = axios.create({ ...defaultConfig })
+        Object.assign(instance, this.setupInterceptorsTo(instance))
+        this.instance = instance
     }
 
     async get<T = any>(url: string) {
-        try {
-            return await this._instance.get<T>(url)
-        } catch (error) {
-            return error as AxiosError<StrapiRes>
-        }
+        return (await this.instance.get<T>(`${url}`)) as T
     }
 
     async post<T = any>(url: string, data?: any) {
-        try {
-            return await this._instance.post<T>(url, data)
-        } catch (error) {
-            return error as AxiosError<StrapiRes>
-        }
+        return (await this.instance.post<T>(url, data)) as T
     }
 
     async put<T = any>(url: string, data?: any) {
-        try {
-            return await this._instance.put<T>(url, data)
-        } catch (error) {
-            return error as AxiosError<StrapiRes>
-        }
+        return await this.instance.put<T>(url, data)
     }
 
     async delete(url: string) {
-        try {
-            return await this._instance.delete(url)
-        } catch (error) {
-            return error as AxiosError<StrapiRes>
-        }
+        return await this.instance.delete(url)
+    }
+
+    private onRequest = async (config: AxiosRequestConfig) => {
+        return config
+    }
+
+    private onRequestError = (error: AxiosError): Promise<AxiosError> => {
+        console.error(`[request error] [${JSON.stringify(error)}]`)
+        return Promise.reject(error)
+    }
+
+    private onResponse = (response: AxiosResponse) => {
+        return response.data
+    }
+
+    private onResponseError = (error: AxiosError): Promise<AxiosError> => {
+        return Promise.reject(error)
+    }
+
+    private setupInterceptorsTo(axiosInstance: AxiosInstance): AxiosInstance {
+        axiosInstance.interceptors.request.use(
+            // @ts-ignore
+            this.onRequest,
+            this.onRequestError
+        )
+        axiosInstance.interceptors.response.use(
+            this.onResponse,
+            this.onResponseError
+        )
+        return axiosInstance
     }
 }
 

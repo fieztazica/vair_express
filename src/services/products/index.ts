@@ -2,20 +2,21 @@ import { StrapiRes } from 'strapiRes'
 import AxiosService from '../axios'
 import { AxiosError } from 'axios'
 import qs from 'qs'
+import { ProductType } from './product.types'
 
 class ProductService extends AxiosService {
     constructor() {
         super('/products')
     }
 
-    async list(userId: string) {
+    async getProductListByDevId(devId: string) {
         const query = qs.stringify(
             {
                 fields: ['name'],
-                populate: ['developer_user'],
+                populate: ['users_permissions_user'],
                 filters: {
-                    developer_user: {
-                        id: userId,
+                    users_permissions_user: {
+                        id: devId,
                     },
                 },
             },
@@ -23,7 +24,19 @@ class ProductService extends AxiosService {
                 encodeValuesOnly: true,
             }
         )
-        return await this.get(`?${query}`)
+        return await this.get<StrapiRes<ProductType[]>>(`?${query}`)
+    }
+
+    async getProductById(productId: string) {
+        const query = qs.stringify(
+            {
+                populate: 'deep',
+            },
+            {
+                encodeValuesOnly: true,
+            }
+        )
+        return await this.get<StrapiRes<ProductType>>(`/${productId}?${query}`)
     }
 }
 

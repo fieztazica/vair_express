@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios'
 import { StrapiLoginLocal, StrapiRes } from 'strapiRes'
 import AxiosService, { axiosDefaultConfig } from '../axios'
-import { LoginSchema } from 'auth.types'
+import { LoginSchema } from './auth.types'
 
 class AuthService extends AxiosService {
     constructor() {
@@ -11,11 +11,7 @@ class AuthService extends AxiosService {
         })
     }
     async localLogin(data: LoginSchema) {
-        try {
-            return await this._instance.post<StrapiLoginLocal>('/local', data)
-        } catch (error) {
-            return error as AxiosError<StrapiRes>
-        }
+        return await this.post<StrapiLoginLocal>('/local', data)
     }
 }
 
