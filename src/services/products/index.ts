@@ -38,6 +38,23 @@ class ProductService extends AxiosService {
         )
         return await this.get<StrapiRes<ProductType>>(`/${productId}?${query}`)
     }
+
+    async getProductbyCategory(Category: string){
+        const query = qs.stringify(
+            {
+                populate: ['categories'],
+                filters: {
+                    categories : {
+                        name : Category,
+                    }
+                }
+            },
+            {
+                encodeValuesOnly: true,
+            }
+        )
+        return await this.get<StrapiRes<ProductType[]>>(`?${query}`)
+    }
 }
 
 const productService = new ProductService()
