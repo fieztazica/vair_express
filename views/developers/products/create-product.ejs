@@ -1,11 +1,12 @@
 <h1>Create a product</h1>
 <div>
     <a href="/developers/products">List</a>
-    <form id="createProdForm">
+    <form id="createProdForm" method="post" action="/developers/products/Create">
         <input type="file" id="fileInput" />
+        <button id="uploadButton">Upload</button>
         <label for="productName">Name:</label>
-        <input type="text" id="productName" name="productName" required>
 
+        <input type="text" id="productName" name="productName" required>
         <label for="productDescription">Description:</label>
         <textarea id="productDescription" name="productDescription" required></textarea>
 
@@ -14,11 +15,10 @@
 
         <label for="productCategories">Categories:</label>
         <input type="text" id="productCategories" name="productCategories" required>
-
+        <br>
         <label for="fileInput">Image:</label>
         <input type="file" id="fileInput" name="productImage" accept="image/*" required>
-
-        <button id="uploadButton">Upload</button>
+        <button type="submit">Save</button>
         <pre id="progressOutput"></pre>
     </form>
 </div>
