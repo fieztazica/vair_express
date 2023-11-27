@@ -5,4 +5,4 @@ export const apiProductRoute = Router()
 
 apiProductRoute.get('/create', controller.createProduct)
 apiProductRoute.get('/:productId', controller.getProduct)
-apiProductRoute.get('/:category', controller.getProductbyCategory)
+apiProductRoute.get('/categories/:category', controller.getProductbyCategory)
