@@ -17,6 +17,20 @@ export const getCategories = async (
     }
 }
 
+export const getTenCategories = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> =>{
+    try {
+        const categoriesRes = await categoryService.getTenCategories()
+        res.status(200).json({ ...categoriesRes })
+    } catch (error) {
+        console.log(error.response.data)
+        next(createHttpError(404, 'Product not found'))
+    }
+}
+
 export const getProductbyCategory = async (
     req: Request,
     res: Response,
