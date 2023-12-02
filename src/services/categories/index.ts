@@ -1,7 +1,7 @@
 import { StrapiRes } from "strapiRes";
 import AxiosService from "../axios";
 import qs from 'qs'
-import { CategoriType } from "./category.types";
+import { CategoryType } from "./category.types";
 
 class CategoryService extends AxiosService{
     constructor(){
@@ -9,11 +9,11 @@ class CategoryService extends AxiosService{
     }
 
     async getAllCategories(){
-        return await this.get<StrapiRes<CategoriType[]>>('')
+        return await this.get<StrapiRes<CategoryType[]>>('')
     }
 
     async getTenCategories(){
-        return await this.get<StrapiRes<CategoriType[]>>('?pagination[limit]=10')
+        return await this.get<StrapiRes<CategoryType[]>>('?pagination[limit]=10')
     }
 }
 

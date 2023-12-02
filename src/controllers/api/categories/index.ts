@@ -31,13 +31,13 @@ export const getTenCategories = async (
     }
 }
 
-export const getProductbyCategory = async (
+export const getProductByCategory = async (
     req: Request,
     res: Response,
     next: NextFunction
 ): Promise<void> => {
     try {
-        const productRes = await productService.getProductbyCategory(
+        const productRes = await productService.getProductByCategory(
             req.params.category
         )
         res.status(200).json({ ...productRes })

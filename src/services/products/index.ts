@@ -39,15 +39,15 @@ class ProductService extends AxiosService {
         return await this.get<StrapiRes<ProductType>>(`/${productId}?${query}`)
     }
 
-    async getProductbyCategory(category: string){
+    async getProductByCategory(category: string) {
         const query = qs.stringify(
             {
                 populate: ['categories'],
                 filters: {
-                    categories : {
-                        name : category,
-                    }
-                }
+                    categories: {
+                        name: category,
+                    },
+                },
             },
             {
                 encodeValuesOnly: true,
@@ -56,16 +56,8 @@ class ProductService extends AxiosService {
         return await this.get<StrapiRes<ProductType[]>>(`?${query}`)
     }
 
-    async createProduct(Product: ProductType){
-        const query = qs.stringify(
-            {
-                
-            },
-            {
-                encodeValuesOnly: true,
-            }
-        )
-        return await this.post<StrapiRes<ProductType>>(`?${query}`,Product)
+    async createProduct(Product: ProductType) {
+        return await this.post<StrapiRes<ProductType>>(``, Product)
     }
 }
 
