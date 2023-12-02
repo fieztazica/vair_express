@@ -110,6 +110,10 @@ function sendFileChunks(file, fileSize) {
                             offset = 0
                         }
                     }
+
+                    if (ack.error) {
+                        alert(`${error}`)
+                    }
                 }
             )
         }

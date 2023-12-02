@@ -38,6 +38,53 @@ main {
     grid-template-columns: 2fr 1fr;
 }
 
+.create-product-form {}
+
+.create-product-form .btn {
+    display: inline-block;
+    /* background: @blue; */
+    /* border: 1px solid darken(@blue, 5%); */
+    padding: .5em 2em;
+    /* color: white; */
+    margin-right: .5em;
+    box-shadow: inset 0px 1px 0px fadeout(white, 80%);
+}
+
+.create-product-form form {
+    display: flex;
+    flex-direction: column;
+}
+
+.create-product-form form>* {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.create-product-form input {
+    display: block;
+    margin: auto auto;
+    width: 100%;
+    margin-bottom: 2em;
+    padding: .5em 0;
+    border: none;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 1.25em;
+    color: #757575;
+}
+
+.create-product-form textarea {
+    resize: vertical;
+    display: block;
+    margin: auto auto;
+    width: 100%;
+    margin-bottom: 2em;
+    padding: .5em 0;
+    border: none;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 1.25em;
+    color: #757575;
+}
+
 .log-form {}
 
 .log-form form {
@@ -60,6 +107,10 @@ main {
     border-bottom: 1px solid #eaeaea;
     padding-bottom: 1.25em;
     color: #757575;
+}
+
+.log-form textarea:focus {
+    outline: none;
 }
 
 .log-form input:focus {

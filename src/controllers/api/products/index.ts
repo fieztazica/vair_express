@@ -30,3 +30,35 @@ export const getProduct = async (
     }
 }
 
+export const getProductsByCategory = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const productRes = await productService.getProductsByCategory(
+            req.params.category
+        )
+        res.status(200).json({ ...productRes })
+    } catch (error) {
+        console.log(error.response.data)
+        next(createHttpError(404, 'Product not found'))
+    }
+}
+
+export const getProducts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const productRes =
+            req.query.category && typeof req.query.category === 'string'
+                ? await productService.getProductsByCategory(req.query.category)
+                : await productService.getProducts()
+        res.status(200).json({ ...productRes })
+    } catch (error) {
+        console.log(error.response.data)
+        next(createHttpError(404, 'Products not found'))
+    }
+}

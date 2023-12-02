@@ -30,4 +30,12 @@ export type StrapiUserLogin = {
     blocked: boolean
     createdAt: string
     updatedAt: string
+    role?: StrapiRole
+}
+
+export type StrapiRole = {
+    id: number
+    name: string
+    type: string
+    description: string
 }

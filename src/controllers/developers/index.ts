@@ -58,6 +58,13 @@ export const createProductPage = async (
     })
 }
 
+export const createProduct = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    res.redirect('/developers/products')
+}
+
 export const productListPage = async (
     req: Request,
     res: Response

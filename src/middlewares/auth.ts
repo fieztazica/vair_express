@@ -4,6 +4,7 @@ import axios from 'axios'
 import { Socket } from 'socket.io'
 import { ExtendedError } from 'socket.io/dist/namespace'
 import { KeyConst } from '../types/keyConst'
+import { cookieValueFinder } from '../utils/cookies'
 
 type SocketNextCallback = (err?: ExtendedError) => void
 
@@ -90,14 +91,15 @@ export const checkAuthorizationView = async (
 }
 
 export const socketAuthCheck = (socket: Socket, next: SocketNextCallback) => {
-    const token =
-        'Bearer ' +
-        socket.handshake.headers.cookie
-            .split('; ')
-            .find((v) => v.includes(KeyConst.TOKEN))
-            .split('=')[1]
-    const validateToken = async (token: string) => {
-        try {
+    try {
+        const token =
+            'Bearer ' +
+            cookieValueFinder(socket.handshake.headers.cookie, KeyConst.TOKEN)
+        // socket.handshake.headers.cookie
+        //     .split(/\s{0,}\;\s{0,}/g)
+        //     .find((v) => v.includes(KeyConst.TOKEN))
+        //     .split('=')[1]
+        const validateToken = async (token: string) => {
             const authRes = await axios.get(authUrl, {
                 headers: { Authorization: token },
             })
@@ -112,9 +114,9 @@ export const socketAuthCheck = (socket: Socket, next: SocketNextCallback) => {
                 throw new Error('You are not a developer')
             }
             next()
-        } catch (error) {
-            next(error?.response?.data?.error ?? error)
         }
+        validateToken(token)
+    } catch (error) {
+        next(error?.response?.data?.error ?? error)
     }
-    validateToken(token)
 }

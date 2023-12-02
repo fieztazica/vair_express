@@ -1,7 +1,10 @@
 import { Request, Response } from 'express'
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
 import { Socket } from 'socket.io'
+import { StrapiUserLogin } from 'strapiRes'
+import { KeyConst } from '../../types/keyConst'
+import { cookieValueFinder } from '../../utils/cookies'
 
 // Create a directory to store uploaded files
 const uploadDir = path.join(__dirname, '../../../uploads')
@@ -29,29 +32,35 @@ export const downloadFile = (req: Request, res: Response) => {
 }
 
 export const handleSocketConnection = (socket: Socket) => {
-    console.log('a user connected')
+    const user = JSON.parse(
+        decodeURIComponent(
+            cookieValueFinder(socket.handshake.headers.cookie, KeyConst.USER)
+        )
+    ) as StrapiUserLogin
+    console.log('a user connected ', user)
+    const userDir = path.join(uploadDir, `${user.id}`)
     socket.on('disconnect', () => {
         console.log('user disconnected')
     })
 
     socket.on('fileChunk', (data, ack) => {
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir)
+        if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir, { recursive: true })
         }
 
         const { fileName, dataChunk, chunkIndex, totalChunks } = data
 
-        const filePath = path.join(uploadDir, fileName)
+        const filePath = path.join(userDir, fileName)
 
-        if (!!fileName && !dataChunk && fs.existsSync(filePath)) {
-            // File already exists, you can handle this scenario as needed
-            console.log(`File '${fileName}' already exists on the server.`)
-            ack({
-                receivedChunkIndex: chunkIndex,
-                message: 'File already exists',
-            })
-            return
-        }
+        // if (!!fileName && !dataChunk && fs.existsSync(filePath)) {
+        //     // File already exists, you can handle this scenario as needed
+        //     console.log(`File '${fileName}' already exists on the server.`)
+        //     ack({
+        //         receivedChunkIndex: chunkIndex,
+        //         message: 'File already exists',
+        //     })
+        //     return
+        // }
 
         try {
             // Write the data chunk to the file
@@ -78,7 +87,7 @@ export const handleSocketConnection = (socket: Socket) => {
 
     socket.on('verifyFile', (data) => {
         const { fileName, fileSize } = data
-        const filePath = path.join(uploadDir, fileName)
+        const filePath = path.join(userDir, fileName)
 
         // Get the size of the saved file on the server
         fs.stat(filePath, (err, stats) => {
