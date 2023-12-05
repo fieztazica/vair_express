@@ -40,7 +40,7 @@ class ProductService extends AxiosService {
     }
 
     async getProductByCategory(category: string) {
-        const countQuery = qs.stringify(
+        const query = qs.stringify(
             {
                 filters: {
                     categories: {
@@ -52,28 +52,23 @@ class ProductService extends AxiosService {
                 encodeValuesOnly: true,
             }
         );
-        const countResponse = await this.get<StrapiRes<ProductType[]>>(`?${countQuery}`);
-        const totalCount = countResponse.data.length;
-        const randomStartIndex = Math.floor(Math.random() * (totalCount - 10)); // Ensure there are at least 10 products
-
-        const randomQuery = qs.stringify(
-            {
-                populate: ['categories'],
-                filters: {
-                    categories: {
-                        name: category,
-                    },
-                }, pagination: {
-                    start: randomStartIndex,
-                    limit: 10,
-                },
-            },
-            {
-                encodeValuesOnly: true,
-            }
-        );
-
-        return await this.get<StrapiRes<ProductType[]>>(`?${randomQuery}`);
+        const countResponse = await this.get<StrapiRes<ProductType[]>>(`?${query}`);
+        const allProducts = countResponse.data;
+        const shuffled = allProducts.slice(0);
+        let i = allProducts.length;
+        let temp;
+        let index;
+      
+        while (i--) {
+          index = Math.floor((i + 1) * Math.random());
+          temp = shuffled[index];
+          shuffled[index] = shuffled[i];
+          shuffled[i] = temp;
+        }
+      
+        const randomProducts = shuffled.slice(0, 10);
+      
+        return randomProducts;
     }
 
 
