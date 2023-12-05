@@ -36,7 +36,7 @@ export const getProductsByCategory = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const productRes = await productService.getProductsByCategory(
+        const productRes = await productService.getProductByCategory(
             req.params.category
         )
         res.status(200).json({ ...productRes })
@@ -54,7 +54,7 @@ export const getProducts = async (
     try {
         const productRes =
             req.query.category && typeof req.query.category === 'string'
-                ? await productService.getProductsByCategory(req.query.category)
+                ? await productService.getProductByCategory(req.query.category)
                 : await productService.getProducts()
         res.status(200).json({ ...productRes })
     } catch (error) {

@@ -39,10 +39,9 @@ class ProductService extends AxiosService {
         return await this.get<StrapiRes<ProductType>>(`/${productId}?${query}`)
     }
 
-    async getProductsByCategory(category: string) {
-        const query = qs.stringify(
+    async getProductByCategory(category: string) {
+        const countQuery = qs.stringify(
             {
-                populate: ['categories'],
                 filters: {
                     categories: {
                         name: category,
@@ -52,26 +51,38 @@ class ProductService extends AxiosService {
             {
                 encodeValuesOnly: true,
             }
-        )
-        return await this.get<StrapiRes<ProductType[]>>(`?${query}`)
-    }
+        );
+        const countResponse = await this.get<StrapiRes<ProductType[]>>(`?${countQuery}`);
+        const totalCount = countResponse.data.length;
+        const randomStartIndex = Math.floor(Math.random() * (totalCount - 10)); // Ensure there are at least 10 products
 
-    async getFeaturedProducts() {}
-
-    async createProduct(product: ProductType) {
-        return await this.post<StrapiRes<ProductType>>(``, product)
-    }
-
-    async getProducts() {
-        const query = qs.stringify(
+        const randomQuery = qs.stringify(
             {
-                populate: 'deep',
+                populate: ['categories'],
+                filters: {
+                    categories: {
+                        name: category,
+                    },
+                }, pagination: {
+                    start: randomStartIndex,
+                    limit: 10,
+                },
             },
             {
                 encodeValuesOnly: true,
             }
-        )
-        return await this.post<StrapiRes<ProductType[]>>(`?${query}`)
+        );
+
+        return await this.get<StrapiRes<ProductType[]>>(`?${randomQuery}`);
+    }
+
+
+    async createProduct(Product: ProductType) {
+        return await this.post<StrapiRes<ProductType>>(``, Product)
+    }
+
+    async getProducts() {
+        return await this.get<StrapiRes<ProductType>>('')
     }
 }
 
