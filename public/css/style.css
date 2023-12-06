@@ -72,6 +72,18 @@ main {
     color: #757575;
 }
 
+.create-product-form select {
+    display: block;
+    margin: auto auto;
+    width: 100%;
+    margin-bottom: 2em;
+    padding: .5em 0;
+    border: none;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 1.25em;
+    color: #757575;
+}
+
 .create-product-form textarea {
     resize: vertical;
     display: block;

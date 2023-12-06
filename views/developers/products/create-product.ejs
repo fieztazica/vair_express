@@ -7,6 +7,7 @@
         method="post"
         action="/developers/products/create"
         class="create-product-form"
+        enctype="application/x-www-form-urlencoded"
     >
         <label for="productName">Name:</label>
         <input type="text" id="productName" name="productName" required />
@@ -28,22 +29,31 @@
         />
 
         <label for="productCategories">Categories:</label>
-        <input
+        <select id="productCategories" name="productCategories" multiple>
+            <% categories.forEach(category => { %>
+            <option value="<%= category.id%>"><%= category.name%></option>
+            <% }) %>
+        </select>
+        <!-- <input
             type="text"
             id="productCategories"
-            name="productCategories"
+            name="productCategoriFes"
             placeholder="split categories with comma"
             required
-        />
+        /> -->
 
-        <br />
         <label for="productImage">Image:</label>
-        <input type="file" name="productImage" accept="image/*" required />
+        <input type="file" name="productImage" accept="image/*" />
 
         <label for="productFile">Upload Product File:</label>
         <input name="productFile" type="file" id="fileInput" />
-        <button class="btn" id="uploadButton">Upload File</button>
-        <pre id="progressOutput"></pre>
+        <progress
+            id="progress"
+            value="0"
+            max="100"
+            style="display: none"
+        ></progress>
+        <input name="downloadUrl" type="text" id="resultDisplay" style="display: none" readonly />
 
         <hr />
 
