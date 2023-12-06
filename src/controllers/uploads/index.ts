@@ -5,6 +5,13 @@ import { Socket } from 'socket.io'
 import { StrapiUserLogin } from 'strapiRes'
 import { KeyConst } from '../../types/keyConst'
 import { cookieValueFinder } from '../../utils/cookies'
+import { io } from '../../server'
+
+interface UploadChunkData {
+    chunk: ArrayBuffer | null
+    fileName: string
+    chunkIndex: number
+}
 
 // Create a directory to store uploaded files
 const uploadDir = path.join(__dirname, '../../../uploads')
@@ -37,84 +44,36 @@ export const handleSocketConnection = (socket: Socket) => {
             cookieValueFinder(socket.handshake.headers.cookie, KeyConst.USER)
         )
     ) as StrapiUserLogin
-    console.log('a user connected ', user)
-    const userDir = path.join(uploadDir, `${user.id}`)
+
+    console.log(`${user.username} connected `)
+
     socket.on('disconnect', () => {
-        console.log('user disconnected')
+        console.log(`${user.username} disconnected`)
     })
 
-    socket.on('fileChunk', (data, ack) => {
-        if (!fs.existsSync(userDir)) {
-            fs.mkdirSync(userDir, { recursive: true })
-        }
+    socket.on('uploadChunk', (data: UploadChunkData, ack: Function) => {
+        const { chunk, fileName, chunkIndex } = data
+        const filePath = path.join(uploadDir, `${user.id}`, `${fileName}`)
 
-        const { fileName, dataChunk, chunkIndex, totalChunks } = data
+        if (chunk !== null) {
+            try {
+                const uint8Array = new Uint8Array(chunk)
+                const flags = chunkIndex === 0 ? 'w' : 'a' // Use 'w' flag for the first chunk
 
-        const filePath = path.join(userDir, fileName)
+                fs.writeFileSync(filePath, uint8Array, { flag: flags })
 
-        // if (!!fileName && !dataChunk && fs.existsSync(filePath)) {
-        //     // File already exists, you can handle this scenario as needed
-        //     console.log(`File '${fileName}' already exists on the server.`)
-        //     ack({
-        //         receivedChunkIndex: chunkIndex,
-        //         message: 'File already exists',
-        //     })
-        //     return
-        // }
-
-        try {
-            // Write the data chunk to the file
-            fs.appendFile(filePath, dataChunk, (err) => {
-                if (err) {
-                    console.error('Error writing file chunk:', err)
-                    ack({
-                        receivedChunkIndex: chunkIndex,
-                        error: 'Error writing file chunk',
-                    })
-                } else {
-                    console.log(`Received and saved chunk ${chunkIndex}`)
-                    ack({ receivedChunkIndex: chunkIndex })
-                }
-            })
-        } catch (error) {
-            console.error('Error writing file chunk:', error)
-            ack({
-                receivedChunkIndex: chunkIndex,
-                error: 'Error writing file chunk',
-            })
-        }
-    })
-
-    socket.on('verifyFile', (data) => {
-        const { fileName, fileSize } = data
-        const filePath = path.join(userDir, fileName)
-
-        // Get the size of the saved file on the server
-        fs.stat(filePath, (err, stats) => {
-            if (err) {
-                console.error('Error reading file size:', err)
-            } else {
-                if (stats.size === fileSize) {
-                    console.log('File sizes match between client and server.')
-                    socket.emit('uploadComplete', {
-                        message: `Upload Complete`,
-                    })
-                } else {
-                    console.log(
-                        'File sizes do not match between client and server.'
-                    )
-                    socket.emit('uploadComplete', { message: `Upload Failed` })
-
-                    // Delete the file on the server if sizes do not match
-                    fs.unlink(filePath, (unlinkErr) => {
-                        if (unlinkErr) {
-                            console.error('Error deleting file:', unlinkErr)
-                        } else {
-                            console.log('File deleted on the server.')
-                        }
-                    })
-                }
+                // Send acknowledgment to the client
+                ack({ success: true })
+            } catch (err) {
+                console.error('Error handling chunk:', err.message)
+                ack({ success: false, error: err.message })
             }
-        })
+        } else {
+            // Last chunk; file upload complete
+            io.to(socket.id).emit('fileUploaded', {
+                fileName,
+                fileUrl: `/uploads/${user.id}/${fileName}`,
+            })
+        }
     })
 }

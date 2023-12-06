@@ -3,6 +3,7 @@ import authService from '../../services/auth'
 import { StrapiErrorDetail } from 'strapiRes'
 import { KeyConst } from '../../types/keyConst'
 import productService from '../../services/products'
+import categoryService from '../../services/categories'
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
     res.clearCookie(KeyConst.TOKEN)
@@ -53,15 +54,26 @@ export const createProductPage = async (
     req: Request,
     res: Response
 ): Promise<void> => {
-    res.render('developers/products/create-product', {
-        title: 'Create Product | Developers',
-    })
+    try {
+        const categoriesRes = await categoryService.getAllCategories()
+        // console.log(categoriesRes.data)
+        res.render('developers/products/create-product', {
+            title: 'Create Product | Developers',
+            categories: categoriesRes.data,
+        })
+    } catch (error) {
+        res.render('developers/products/create-product', {
+            title: 'Create Product | Developers',
+            categories: [],
+        })
+    }
 }
 
 export const createProduct = async (
     req: Request,
     res: Response
 ): Promise<void> => {
+    console.log(req.body)
     res.redirect('/developers/products')
 }
 
@@ -79,13 +91,13 @@ export const productListPage = async (
 
     try {
         const productsRes = await productService.getProductListByDevId(user.id)
-        console.log(productsRes.data)
+        // console.log(productsRes.data)
         res.render('developers/products/list', {
             title: 'List Product | Developers',
             products: productsRes.data,
         })
     } catch (error) {
-        console.log(error.response.data)
+        console.error(error)
         res.render('developers/products/list', {
             title: 'List Product | Developers',
             products: [],

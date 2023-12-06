@@ -25,7 +25,7 @@ export const getProduct = async (
         )
         res.status(200).json({ ...productRes })
     } catch (error) {
-        console.log(error.response.data)
+        console.error(error.response.data)
         next(createHttpError(404, 'Product not found'))
     }
 }
@@ -41,7 +41,7 @@ export const getProductsByCategory = async (
         )
         res.status(200).json({ ...productRes })
     } catch (error) {
-        console.log(error.response.data)
+        console.error(error.response.data)
         next(createHttpError(404, 'Product not found'))
     }
 }
@@ -58,7 +58,7 @@ export const getProducts = async (
                 : await productService.getProducts()
         res.status(200).json({ ...productRes })
     } catch (error) {
-        console.log(error.response.data)
+        console.error(error.response.data)
         next(createHttpError(404, 'Products not found'))
     }
 }

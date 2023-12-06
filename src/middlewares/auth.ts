@@ -46,7 +46,7 @@ export const checkAuthorization = async (
         // console.log(authRes.data)
         next()
     } catch (error) {
-        console.log(error.message)
+        console.error(error.message)
         return res.status(error.status || 500).json({ error: error.message })
     }
 }
