@@ -16,27 +16,27 @@ interface UploadChunkData {
 // Create a directory to store uploaded files
 const uploadDir = path.join(__dirname, '../../../uploads')
 
-export const index = async (req: Request, res: Response): Promise<void> => {
-    // Check if there are any files in the request
-    if (!req.file) {
-        res.status(400).json({ error: 'No file uploaded' })
-        return
-    }
-    res.json({ data: 'hi' })
-}
+// export const index = async (req: Request, res: Response): Promise<void> => {
+//     // Check if there are any files in the request
+//     if (!req.file) {
+//         res.status(400).json({ error: 'No file uploaded' })
+//         return
+//     }
+//     res.json({ data: 'hi' })
+// }
 
-export const downloadFile = (req: Request, res: Response) => {
-    const filePath = path.join(uploadDir, req.params.filename)
+// export const downloadFile = (req: Request, res: Response) => {
+//     const filePath = path.join(uploadDir, req.params.filename)
 
-    console.log(filePath)
+//     console.log(filePath)
 
-    // Check if the file exists
-    if (fs.existsSync(filePath)) {
-        res.download(filePath)
-    } else {
-        res.status(404).json({ error: 'File not found' })
-    }
-}
+//     // Check if the file exists
+//     if (fs.existsSync(filePath)) {
+//         res.download(filePath)
+//     } else {
+//         res.status(404).json({ error: 'File not found' })
+//     }
+// }
 
 export const handleSocketConnection = (socket: Socket) => {
     const user = JSON.parse(
