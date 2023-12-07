@@ -1,9 +1,12 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import authService from '../../services/auth'
 import { StrapiErrorDetail } from 'strapiRes'
 import { KeyConst } from '../../types/keyConst'
 import productService from '../../services/products'
 import categoryService from '../../services/categories'
+import createHttpError from 'http-errors'
+import uploadService from '../../services/uploads'
+import { UploadProductType } from '../../services/products/product.types'
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
     res.clearCookie(KeyConst.TOKEN)
@@ -55,26 +58,93 @@ export const createProductPage = async (
     res: Response
 ): Promise<void> => {
     try {
+        const user = req.cookies[KeyConst.USER]
+            ? JSON.parse(req.cookies[KeyConst.USER])
+            : null
+        if (!user) {
+            res.redirect('/developers')
+            return
+        }
+
         const categoriesRes = await categoryService.getAllCategories()
         // console.log(categoriesRes.data)
         res.render('developers/products/create-product', {
             title: 'Create Product | Developers',
             categories: categoriesRes.data,
+            message: null,
         })
     } catch (error) {
         res.render('developers/products/create-product', {
             title: 'Create Product | Developers',
             categories: [],
+            message: null,
         })
     }
 }
 
 export const createProduct = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
-    console.log(req.body)
-    res.redirect('/developers/products')
+    try {
+        const user = req.cookies[KeyConst.USER]
+            ? JSON.parse(req.cookies[KeyConst.USER])
+            : null
+        if (!user) {
+            res.redirect('/developers')
+            return
+        }
+
+        let message =
+            'Successfully uploaded your product! Please wait while our staff are approving it.'
+        const errors: string[] = []
+
+        if (!req.file) {
+            errors.push('Missing image file')
+        }
+
+        if (!req.file?.mimetype?.includes('image')) {
+            errors.push('Not image file')
+        }
+
+        if (!req.body) {
+            errors.push('Missing Body')
+        }
+
+        if (!req.body.downloadUrl) {
+            errors.push('Missing Download Url')
+        }
+
+        if (errors.length) {
+            message = errors.join(', ')
+        } else {
+            const uploadRes = await uploadService.uploadImage(req.file)
+            const image = uploadRes.shift()
+            const uploadProDto: UploadProductType = {
+                name: req.body.productName,
+                description: req.body.productDescription,
+                developer: `1`,
+                publisher: `1`,
+                users_permissions_user: `${user.id}`,
+                price: req.body.productPrice,
+                downloadUrl: req.body.downloadUrl,
+                logo: `${image.id}`,
+                publishedAt: null,
+            }
+            const prodUpRes = await productService.createProduct(uploadProDto)
+            console.log(prodUpRes.data)
+        }
+
+        res.render('developers/products/create-product', {
+            title: 'Create Product | Developers',
+            categories: [],
+            message,
+        })
+    } catch (error) {
+        console.error(error?.response?.data)
+        next(createHttpError(500, `${error}`))
+    }
 }
 
 export const productListPage = async (

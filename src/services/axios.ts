@@ -11,7 +11,7 @@ const strapiToken = process.env.STRAPI_API_TOKEN as string
 
 export const axiosDefaultConfig: AxiosRequestConfig = {
     baseURL: `${baseUrl}/api`,
-    timeout: 10000,
+    timeout: 30000,
     headers: { Authorization: `Bearer ${strapiToken}` },
 }
 

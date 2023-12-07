@@ -24,5 +24,6 @@ developerRoute.get(
 developerRoute.post(
     '/products/create',
     checkAuthorizationView,
+    upload.single('productImage'),
     controller.createProduct
 )

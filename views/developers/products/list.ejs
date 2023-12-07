@@ -9,7 +9,14 @@
     <div>
         <ul>
             <% products.forEach(product => { %>
-            <li><%= product.name%></li>
+            <li>
+                <% if (product.publishedAt) { %>
+                <span>[P]</span>
+                <% }else { %>
+                <span>[_]</span>
+                <% } %>
+                <span><%= product.name%></span>
+            </li>
             <% }) %>
         </ul>
     </div>

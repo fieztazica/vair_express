@@ -1,5 +1,4 @@
 const fileInput = document.getElementById('fileInput')
-const uploadButton = document.getElementById('uploadButton')
 const progressBar = document.getElementById('progress')
 const createProdForm = document.getElementById('createProdForm')
 const resultDisplay = document.getElementById('resultDisplay')
@@ -86,6 +85,7 @@ socket.on('connect_error', (err) => {
 
 socket.on('fileUploaded', (data) => {
     console.log('File uploaded:', data.fileName)
+    fileInput.remove()
     progressBar.value = 100
     progressBar.style.display = 'none'
 
