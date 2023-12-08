@@ -16,6 +16,7 @@ import { homeRoute } from './routes/home'
 import { apiRoute } from './routes/api'
 import { developerRoute } from './routes/developers'
 import { uploadRoute } from './routes/uploads'
+import { apiBoughtRoute } from './routes/api/boughts'
 
 // import { index } from './routes/developers/index'
 // Create Express server
@@ -45,6 +46,7 @@ app.set('view engine', 'ejs')
 app.use('/uploads', uploadRoute)
 app.use('/api', apiRoute)
 app.use('/developers', developerRoute)
+app.use('/boughts', apiBoughtRoute)
 app.use('/', homeRoute)
 
 // middleware handlers
