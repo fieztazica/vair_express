@@ -3,11 +3,14 @@ import AxiosService from '../axios'
 import { AxiosError } from 'axios'
 import qs from 'qs'
 import { ProductType, UploadProductType } from './product.types'
+import boughtService from '../boughts'
 
 class ProductService extends AxiosService {
     constructor() {
         super('/products')
     }
+
+    _boughtService = boughtService
 
     async getProductListByDevId(devId: string) {
         const query = qs.stringify(
@@ -80,6 +83,14 @@ class ProductService extends AxiosService {
 
     async getProducts() {
         return await this.get<StrapiRes<ProductType>>('/')
+    }
+
+    async buy(productId: string, userId: string, cost: number = 0) {
+        return this._boughtService.createBought({
+            product: productId,
+            total: cost,
+            users_permissions_user: userId,
+        })
     }
 }
 

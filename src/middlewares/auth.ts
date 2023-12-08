@@ -34,6 +34,7 @@ export const checkAuthorization = async (
                 maxAge: 900000,
                 httpOnly: true,
             })
+            res.locals.user = authRes.data
         }
 
         if (
