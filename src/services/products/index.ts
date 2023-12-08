@@ -82,7 +82,15 @@ class ProductService extends AxiosService {
     }
 
     async getProducts() {
-        return await this.get<StrapiRes<ProductType>>('/')
+        const query = qs.stringify(
+            {
+                populate: ['logo', 'banners'],
+            },
+            {
+                encodeValuesOnly: true,
+            }
+        )
+        return await this.get<StrapiRes<ProductType>>(`/${query}`)
     }
 
     async buy(productId: string, userId: string, cost: number = 0) {
