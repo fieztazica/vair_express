@@ -2,7 +2,7 @@ import { StrapiRes } from 'strapiRes'
 import AxiosService from '../axios'
 import { AxiosError } from 'axios'
 import qs from 'qs'
-import { ProductType } from './product.types'
+import { ProductType, UploadProductType } from './product.types'
 
 class ProductService extends AxiosService {
     constructor() {
@@ -12,13 +12,14 @@ class ProductService extends AxiosService {
     async getProductListByDevId(devId: string) {
         const query = qs.stringify(
             {
-                fields: ['name'],
+                fields: ['name', 'publishedAt'],
                 populate: ['users_permissions_user'],
                 filters: {
                     users_permissions_user: {
                         id: devId,
                     },
                 },
+                publicationState: 'preview',
             },
             {
                 encodeValuesOnly: true,
@@ -42,7 +43,6 @@ class ProductService extends AxiosService {
     async getProductByCategory(category: string) {
         const query = qs.stringify(
             {
-                populate: ['categories'],
                 filters: {
                     categories: {
                         name: category,
@@ -53,11 +53,33 @@ class ProductService extends AxiosService {
                 encodeValuesOnly: true,
             }
         )
-        return await this.get<StrapiRes<ProductType[]>>(`?${query}`)
+        const countResponse = await this.get<StrapiRes<ProductType[]>>(
+            `?${query}`
+        )
+        const allProducts = countResponse.data
+        const shuffled = allProducts.slice(0)
+        let i = allProducts.length
+        let temp
+        let index
+
+        while (i--) {
+            index = Math.floor((i + 1) * Math.random())
+            temp = shuffled[index]
+            shuffled[index] = shuffled[i]
+            shuffled[i] = temp
+        }
+
+        const randomProducts = shuffled.slice(0, 10)
+
+        return randomProducts
     }
 
-    async createProduct(Product: ProductType) {
-        return await this.post<StrapiRes<ProductType>>(``, Product)
+    async createProduct(product: UploadProductType) {
+        return await this.post<StrapiRes<ProductType>>(`/`, product)
+    }
+
+    async getProducts() {
+        return await this.get<StrapiRes<ProductType>>('/')
     }
 }
 

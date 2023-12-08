@@ -1,9 +1,7 @@
 import { Router } from 'express'
 import multer from 'multer'
 import * as controller from '../../controllers/developers'
-import {
-    checkAuthorizationView
-} from '../../middlewares/auth'
+import { checkAuthorizationView } from '../../middlewares/auth'
 
 const upload = multer()
 
@@ -22,4 +20,10 @@ developerRoute.get(
     '/products/create',
     checkAuthorizationView,
     controller.createProductPage
+)
+developerRoute.post(
+    '/products/create',
+    checkAuthorizationView,
+    upload.single('productImage'),
+    controller.createProduct
 )

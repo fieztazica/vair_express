@@ -5,8 +5,8 @@ import { socketAuthCheck } from './middlewares/auth'
 
 const port = app.get('port')
 
-const server = app.listen(port, onListening)
-const io = new socketIo(server, {
+export const server = app.listen(port, onListening)
+export const io = new socketIo(server, {
     maxHttpBufferSize: 1e8,
 })
 

@@ -1,13 +1,9 @@
 const fileInput = document.getElementById('fileInput')
-const uploadButton = document.getElementById('uploadButton')
-const progressOutput = document.getElementById('progressOutput')
+const progressBar = document.getElementById('progress')
 const createProdForm = document.getElementById('createProdForm')
+const resultDisplay = document.getElementById('resultDisplay')
 
 const socket = io()
-
-const chunkSize = 1024 * 1024 // 1MB chunks
-let offset = 0
-let isUploading = false
 
 fileInput.addEventListener('change', (e) => {
     e.preventDefault()
@@ -15,116 +11,84 @@ fileInput.addEventListener('change', (e) => {
     if (file && file.size < 1024 * 1024) {
         alert('File too small')
         createProdForm.reset()
+        return
     }
+    sendChunksSequentially(file)
 })
 
-uploadButton.addEventListener('click', (e) => {
-    e.preventDefault()
-    if (isUploading || offset > 0) {
-        return // Prevent multiple uploads
+function sendChunksSequentially(file) {
+    fileInput.style.display = 'none'
+    progressBar.style.display = 'block'
+    progressBar.value = 0
+    progressBar.max = 100
+
+    const CHUNK_SIZE = 1024 * 1024 // Adjust the chunk size as needed
+    const CHUNK_UPLOAD_DELAY = 500
+    let offset = 0
+    const reader = new FileReader()
+
+    const sendNextChunk = () => {
+        const chunk = file.slice(offset, offset + CHUNK_SIZE)
+        reader.readAsArrayBuffer(chunk)
     }
 
-    const file = fileInput.files[0]
-    if (!file) {
-        alert('No file provided')
-        return
-    }
-
-    if (file.size < 1024 * 1024) {
-        alert('File too small')
-        createProdForm.reset()
-        return
-    }
-
-    isUploading = true
-    uploadButton.disabled = isUploading
-    const fileName = file.name
-    const fileSize = file.size
-    socket.emit(
-        'fileChunk',
-        { fileName, dataChunk: null, chunkIndex: 0, totalChunks: 0 },
-        (ack) => {
-            if (ack.message === 'File already exists') {
-                console.log(`File '${fileName}' already exists on the server.`)
-                alert(`File '${fileName}' already exists on the server.`)
-                createProdForm.reset()
-                isUploading = false
-                uploadButton.disabled = isUploading
-                return
-            } else {
-                // Start sending file chunks
-                sendFileChunks(file, fileSize)
+    reader.onload = (event) => {
+        if (event.target && event.target.result) {
+            const chunkData = {
+                chunk: event.target.result,
+                fileName: file.name,
+                chunkIndex: offset === 0 ? 0 : Math.floor(offset / CHUNK_SIZE),
             }
-        }
-    )
-})
 
-socket.on('uploadComplete', (data) => {
-    progressOutput.textContent = `${data.message}`
-    isUploading = false
-    uploadButton.disabled = isUploading
-    createProdForm.reset()
-})
+            setTimeout(() => {
+                socket.emit('uploadChunk', chunkData, (ack) => {
+                    if (ack.success) {
+                        offset += CHUNK_SIZE
+
+                        const progress = (offset / file.size) * 100
+                        progressBar.value = progress
+
+                        if (offset < file.size) {
+                            sendNextChunk() // Send the next chunk if file not fully uploaded
+                        } else {
+                            // Last chunk; file upload complete
+                            const lastChunkData = {
+                                chunk: null,
+                                fileName: file.name,
+                                chunkIndex: -1, // Indicate the last chunk
+                            }
+                            socket.emit('uploadChunk', lastChunkData)
+                        }
+                    } else {
+                        console.error(
+                            'Error occurred while uploading chunk:',
+                            ack.error
+                        )
+                        // Handle error, perhaps retry or inform the user
+                        setTimeout(sendNextChunk, CHUNK_UPLOAD_DELAY)
+                    }
+                })
+            }, CHUNK_UPLOAD_DELAY)
+        }
+    }
+
+    sendNextChunk() // Start the process by sending the first chunk
+}
 
 socket.on('connect_error', (err) => {
     alert(
         `Connection failed. ${err.message}. Please reload the page or sign in`
     )
-    uploadButton.disabled = true
+    // uploadButton.disabled = true
     console.error(err)
 })
 
-function sendFileChunks(file, fileSize) {
-    const chunkSize = 1024 * 1024 // 1MB chunks
-    const reader = new FileReader()
-    let chunkIndex = offset / chunkSize
+socket.on('fileUploaded', (data) => {
+    console.log('File uploaded:', data.fileName)
+    fileInput.remove()
+    progressBar.value = 100
+    progressBar.style.display = 'none'
 
-    const sendChunkWithDelay = () => {
-        const chunkStart = offset
-        const chunkEnd = Math.min(offset + chunkSize, file.size)
-        const chunk = file.slice(chunkStart, chunkEnd)
-
-        reader.onload = (event) => {
-            const dataChunk = event.target.result
-            socket.emit(
-                'fileChunk',
-                {
-                    fileName: file.name,
-                    dataChunk,
-                    chunkIndex: offset / chunkSize,
-                    totalChunks: Math.ceil(file.size / chunkSize),
-                },
-                (ack) => {
-                    console.log(
-                        `Received acknowledgment for chunk ${ack.receivedChunkIndex}`
-                    )
-
-                    if (ack.receivedChunkIndex === chunkIndex) {
-                        offset += chunkSize
-                        updateProgress(offset, file.size)
-                        if (offset < file.size) {
-                            chunkIndex = offset / chunkSize
-                            setTimeout(sendChunkWithDelay, 1000) // Send next chunk after 1 second
-                        } else {
-                            verifyFile(file.name, fileSize)
-                            offset = 0
-                        }
-                    }
-                }
-            )
-        }
-
-        reader.readAsArrayBuffer(chunk)
-    }
-
-    sendChunkWithDelay() // Start sending chunks with a delay
-}
-
-function verifyFile(fileName, fileSize) {
-    socket.emit('verifyFile', { fileName, fileSize })
-}
-
-function updateProgress(uploaded, total) {
-    const progress = (uploaded / total) * 100
-    progressOutput.textContent = `Upload Progress: ${progress.toFixed(2)}%`
-}
+    resultDisplay.style.display = 'block'
+    resultDisplay.value = data.fileUrl
+})

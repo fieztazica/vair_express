@@ -11,10 +11,6 @@ class CategoryService extends AxiosService{
     async getAllCategories(){
         return await this.get<StrapiRes<CategoryType[]>>('')
     }
-
-    async getTenCategories(){
-        return await this.get<StrapiRes<CategoryType[]>>('?pagination[limit]=10')
-    }
 }
 
 const categoryService = new CategoryService()
