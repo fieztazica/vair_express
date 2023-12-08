@@ -10,8 +10,8 @@ type SocketNextCallback = (err?: ExtendedError) => void
 
 const authUrl = `${process.env.STRAPI_URL as string}/api/users/me?populate=role`
 
-// Create a middleware function for authorization
-export const checkAuthorization = async (
+// Create a middleware function for authorization with developer role
+export const checkDeveloper = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -45,6 +45,40 @@ export const checkAuthorization = async (
             throw createHttpError.Unauthorized('You are not a developer')
         }
         // console.log(authRes.data)
+        next()
+    } catch (error) {
+        console.error(error.message)
+        return res.status(error.status || 500).json({ error: error.message })
+    }
+}
+
+// Create a middleware function for authorization
+export const checkAuthorization = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const token =
+            req.headers.authorization || `Bearer ${req.cookies[KeyConst.TOKEN]}`
+        if (!token) {
+            throw createHttpError.Unauthorized()
+        }
+        const authRes = await axios.get(authUrl, {
+            headers: { Authorization: token },
+        })
+        if (!authRes) {
+            throw createHttpError.Unauthorized()
+        }
+
+        if (authRes?.data) {
+            res.cookie(KeyConst.USER, JSON.stringify(authRes.data), {
+                maxAge: 900000,
+                httpOnly: true,
+            })
+            res.locals.user = authRes.data
+        }
+
         next()
     } catch (error) {
         console.error(error.message)
