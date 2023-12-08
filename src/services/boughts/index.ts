@@ -12,6 +12,23 @@ class BoughtService extends AxiosService {
         return await this.get<StrapiRes<BoughtType[]>>('')
     }
 
+    async getBoughtsByUserId(userId: string) {
+        const query = qs.stringify(
+            {
+                filters: {
+                    users_permissions_user: {
+                        id: userId,
+                    },
+                },
+                populate: 'deep',
+            },
+            {
+                encodeValuesOnly: true,
+            }
+        )
+        return await this.get<StrapiRes<BoughtType[]>>(`?${query}`)
+    }
+
     async createBought(data: CreateBoughtType) {
         const query = qs.stringify(
             {
