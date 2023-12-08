@@ -53,7 +53,14 @@ export const handleSocketConnection = (socket: Socket) => {
 
     socket.on('uploadChunk', (data: UploadChunkData, ack: Function) => {
         const { chunk, fileName, chunkIndex } = data
-        const filePath = path.join(uploadDir, `${user.id}`, `${fileName}`)
+        const userDir = path.join(uploadDir, `${user.id}`)
+
+        // Ensure the uploads directory exists; if not, create it
+        if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir)
+        }
+        
+        const filePath = path.join(userDir, `${fileName}`)
 
         if (chunk !== null) {
             try {
