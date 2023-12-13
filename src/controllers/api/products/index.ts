@@ -153,3 +153,21 @@ export const getProducts = async (
         next(createHttpError(404, 'Products not found'))
     }
 }
+
+export const searchProducts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        if (req.query.q && typeof req.query.q === 'string') {
+            const productRes = await productService.searchProduct(req.query.q)
+            res.status(200).json({ ...productRes })
+        } else {
+            next(createHttpError(400, "'q' query is not provided"))
+        }
+    } catch (error) {
+        console.error(error.response.data)
+        next(createHttpError(404, 'Products not found'))
+    }
+}

@@ -100,6 +100,41 @@ class ProductService extends AxiosService {
             users_permissions_user: userId,
         })
     }
+
+    async searchProduct(queryString: string) {
+        const query = qs.stringify(
+            {
+                populate: ['deep'],
+                filters: {
+                    $or: [
+                        {
+                            name: {
+                                $containsi: queryString,
+                            },
+                        },
+                        {
+                            developer: {
+                                name: {
+                                    $containsi: queryString,
+                                },
+                            },
+                        },
+                        {
+                            publisher: {
+                                name: {
+                                    $containsi: queryString,
+                                },
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                encodeValuesOnly: true,
+            }
+        )
+        return await this.get<StrapiRes<ProductType[]>>(`?${query}`)
+    }
 }
 
 const productService = new ProductService()
