@@ -56,25 +56,8 @@ class ProductService extends AxiosService {
                 encodeValuesOnly: true,
             }
         )
-        const countResponse = await this.get<StrapiRes<ProductType[]>>(
-            `?${query}`
-        )
-        const allProducts = countResponse.data
-        const shuffled = allProducts.slice(0)
-        let i = allProducts.length
-        let temp
-        let index
 
-        while (i--) {
-            index = Math.floor((i + 1) * Math.random())
-            temp = shuffled[index]
-            shuffled[index] = shuffled[i]
-            shuffled[i] = temp
-        }
-
-        const randomProducts = shuffled.slice(0, 10)
-
-        return randomProducts
+        return await this.get<StrapiRes<ProductType[]>>(`?${query}`)
     }
 
     async createProduct(product: UploadProductType) {
