@@ -48,7 +48,9 @@ class ProductService extends AxiosService {
             {
                 filters: {
                     categories: {
-                        name: category,
+                        name: {
+                            $containsi: category,
+                        },
                     },
                 },
             },
