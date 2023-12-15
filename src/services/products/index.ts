@@ -53,6 +53,7 @@ class ProductService extends AxiosService {
                         },
                     },
                 },
+                populate: ['logo', 'banners'],
             },
             {
                 encodeValuesOnly: true,
