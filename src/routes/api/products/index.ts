@@ -18,3 +18,8 @@ apiProductRoute.post(
     checkAuthorization,
     controller.buyProduct
 )
+apiProductRoute.post(
+    '/:productId/feedback',
+    checkAuthorization,
+    controller.feedbackProduct
+)

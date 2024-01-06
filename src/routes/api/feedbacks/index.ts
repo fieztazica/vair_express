@@ -10,8 +10,3 @@ apiFeedbackRoute.get(
     checkAuthorization,
     controller.getFeedbacksByBought
 )
-// apiProductRoute.post(
-//     '/:productId/buy',
-//     checkAuthorization,
-//     controller.buyProduct
-// )

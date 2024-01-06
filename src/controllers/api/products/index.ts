@@ -5,6 +5,8 @@ import path from 'path'
 import fs from 'fs'
 import { KeyConst } from '../../../types/keyConst'
 import boughtService from '../../../services/boughts'
+import feedbackService from '../../../services/feedbacks'
+import { CreateFeedbackType } from '../../../services/feedbacks/feedback.types'
 
 // Create a directory to store uploaded files
 const uploadDir = path.join(__dirname, '../../../../uploads')
@@ -169,5 +171,38 @@ export const searchProducts = async (
     } catch (error) {
         console.error(error.response.data)
         next(createHttpError(404, 'Products not found'))
+    }
+}
+
+export const feedbackProduct = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const user = res.locals.user
+        const productId = req.params.productId
+        const data: CreateFeedbackType = req.body
+
+        const boughtRes = await boughtService.checkBought(productId, user.id)
+
+        const bought = boughtRes.data.shift()
+
+        if (!bought || !bought?.id) {
+            next(createHttpError(500, `${'Something went wrong'}`))
+            return
+        }
+
+        const feedbackRes = await feedbackService.createFeedback({
+            ...data,
+            bought: `${bought.id}`,
+            users_permissions_user: `${user.id}`,
+        })
+
+        res.status(200).json({
+            ...feedbackRes,
+        })
+    } catch (error) {
+        next(createHttpError(500, `${error}`))
     }
 }

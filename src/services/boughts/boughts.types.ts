@@ -3,6 +3,7 @@ import { FeedbackType } from '../feedbacks/feedback.types'
 import { ProductType } from '../products/product.types'
 
 export type BoughtType = {
+    id?: number
     total: number
     comment?: string
     recommend?: boolean
