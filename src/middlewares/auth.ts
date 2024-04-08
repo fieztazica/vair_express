@@ -47,6 +47,8 @@ export const checkDeveloper = async (
         // console.log(authRes.data)
         next()
     } catch (error) {
+        res.clearCookie(KeyConst.TOKEN)
+        res.clearCookie(KeyConst.USER)
         console.error(error.message)
         return res.status(error.status || 500).json({ error: error.message })
     }
@@ -81,6 +83,8 @@ export const checkAuthorization = async (
 
         next()
     } catch (error) {
+        res.clearCookie(KeyConst.TOKEN)
+        res.clearCookie(KeyConst.USER)
         console.error(error.message)
         return res.status(error.status || 500).json({ error: error.message })
     }
@@ -121,6 +125,8 @@ export const checkAuthorizationView = async (
         // console.log(authRes.data)
         next()
     } catch (error) {
+        res.clearCookie(KeyConst.TOKEN)
+        res.clearCookie(KeyConst.USER)
         res.redirect('/developers')
     }
 }

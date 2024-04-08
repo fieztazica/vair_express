@@ -10,6 +10,7 @@ import { UploadProductType } from '../../services/products/product.types'
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
     res.clearCookie(KeyConst.TOKEN)
+    res.clearCookie(KeyConst.USER)
     res.redirect('/developers')
 }
 
