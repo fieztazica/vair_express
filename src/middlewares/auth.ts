@@ -95,13 +95,13 @@ export const checkAuthorizationView = async (
         const token =
             req.headers.authorization || `Bearer ${req.cookies[KeyConst.TOKEN]}`
         if (!token) {
-            return res.redirect('/developers')
+            throw createHttpError.Unauthorized()
         }
         const authRes = await axios.get(authUrl, {
             headers: { Authorization: token },
         })
         if (!authRes) {
-            return res.redirect('/developers')
+            throw createHttpError.Unauthorized()
         }
 
         if (authRes?.data) {
@@ -116,7 +116,7 @@ export const checkAuthorizationView = async (
             !authRes.data?.role?.name ||
             authRes.data.role.name != KeyConst.DEVELOPER
         ) {
-            return res.redirect('/developers')
+            throw createHttpError.Unauthorized()
         }
         // console.log(authRes.data)
         next()

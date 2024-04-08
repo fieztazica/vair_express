@@ -7,8 +7,6 @@ const upload = multer()
 
 export const developerRoute = Router()
 
-developerRoute.get('/', upload.none(), controller.loginPage)
-developerRoute.post('/', upload.none(), controller.loginSubmit)
 developerRoute.post('/logout', upload.none(), controller.logout)
 
 developerRoute.get(
@@ -27,3 +25,6 @@ developerRoute.post(
     upload.single('productImage'),
     controller.createProduct
 )
+
+developerRoute.get('/', upload.none(), controller.loginPage)
+developerRoute.post('/', upload.none(), controller.loginSubmit)
